@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>축제 찾기</title>
+  <style>
+    :root { --ink:#17242b; --muted:#62717a; --line:#dce4e6; --surface:#fff; --ground:#f5f8f6; --brand:#047857; --brand-dark:#065f46; --accent:#f6b84a; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--ground); font-family:"Pretendard","Noto Sans KR",Arial,sans-serif; }
+    button, input, select { font:inherit; }
+    .hero { background:linear-gradient(128deg,#063d38 0%,#08745b 56%,#10a174 100%); color:#fff; padding:clamp(3.25rem,8vw,6.5rem) 1.25rem 7.5rem; }
+    .wrap { width:min(1120px,100%); margin:0 auto; }
+    .eyebrow { display:inline-flex; align-items:center; gap:.45rem; color:#d7f5e7; font-size:.85rem; font-weight:700; letter-spacing:.08em; }
+    .eyebrow::before { content:""; width:.55rem; height:.55rem; border-radius:50%; background:var(--accent); }
+    h1 { margin:.8rem 0 .85rem; font-size:clamp(2.25rem,5vw,4.5rem); letter-spacing:-.06em; line-height:1.05; }
+    .hero p { max-width:38rem; margin:0; color:#d8ede5; font-size:1.05rem; line-height:1.65; }
+    main { margin-top:-4.25rem; padding:0 1.25rem 4rem; }
+    .search-panel { background:var(--surface); border-radius:1.35rem; padding:clamp(1.15rem,3vw,2rem); box-shadow:0 16px 42px rgba(5,52,45,.16); }
+    .search-panel h2 { margin:0 0 1.3rem; font-size:1.15rem; letter-spacing:-.03em; }
+    form { display:grid; grid-template-columns:1.05fr .9fr .9fr 1.45fr auto; gap:.85rem; align-items:end; }
+    .field { min-width:0; display:grid; gap:.42rem; }
+    label { color:#3c4b52; font-size:.82rem; font-weight:700; }
+    input, select { width:100%; min-height:3.2rem; padding:0 .85rem; border:1px solid #cbd7d7; border-radius:.7rem; color:var(--ink); background:#fff; outline:none; }
+    input:focus, select:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(4,120,87,.14); }
+    .search-actions { display:grid; grid-template-columns:repeat(2,auto); gap:.55rem; }
+    .search-button { min-height:3.2rem; border:0; border-radius:.7rem; padding:0 1.15rem; cursor:pointer; color:#fff; background:var(--brand); font-weight:800; white-space:nowrap; }
+    .search-button:hover { background:var(--brand-dark); }
+    .sample-button { color:var(--brand-dark); border:1px solid #9ccaba; background:#fff; }
+    .sample-button:hover { color:#fff; background:var(--brand-dark); }
+    .search-button:disabled { cursor:wait; opacity:.62; }
+    .error { min-height:1.2rem; margin:.75rem 0 0; color:#c23a30; font-size:.86rem; font-weight:600; }
+    .results { padding-top:2.35rem; }
+    .results-heading { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.1rem; }
+    .results-heading h2 { margin:0; font-size:clamp(1.45rem,3vw,2rem); letter-spacing:-.05em; }
+    .count { margin:0; color:var(--muted); font-size:.9rem; }
+    .status { display:grid; place-items:center; min-height:260px; padding:2rem; border:1px dashed #bdcfcb; border-radius:1rem; color:var(--muted); text-align:center; background:rgba(255,255,255,.56); }
+    .status strong { display:block; margin-bottom:.5rem; color:var(--ink); font-size:1.1rem; }
+    .card-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.15rem; }
+    .card { overflow:hidden; display:flex; flex-direction:column; min-width:0; border:1px solid #e1e8e6; border-radius:1rem; background:var(--surface); box-shadow:0 3px 12px rgba(15,42,34,.04); }
+    .image-wrap { position:relative; aspect-ratio:1.6/1; overflow:hidden; background:linear-gradient(135deg,#d4e8e0,#b5d9ce); }
+    .image-wrap img { width:100%; height:100%; display:block; object-fit:cover; }
+    .no-image { position:absolute; inset:0; display:grid; place-items:center; color:#4f766a; font-size:.88rem; font-weight:700; }
+    .card-body { display:grid; gap:.75rem; padding:1.15rem; }
+    .card h3 { margin:0; font-size:1.12rem; line-height:1.42; letter-spacing:-.035em; }
+    .meta { display:grid; gap:.45rem; margin:0; color:#526168; font-size:.88rem; line-height:1.5; }
+    .meta div { display:flex; align-items:flex-start; gap:.45rem; }
+    .icon { flex:none; width:1.15rem; color:var(--brand); font-weight:800; text-align:center; }
+    @media (max-width:850px) { form { grid-template-columns:repeat(2,minmax(0,1fr)); } .search-actions { grid-column:span 2; } .card-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:520px) { .hero { padding-bottom:6rem; } main { margin-top:-3rem; padding-inline:1rem; } .search-panel { border-radius:1rem; } form { grid-template-columns:1fr; } .search-actions { grid-column:auto; grid-template-columns:1fr; } .search-button { width:100%; } .card-grid { grid-template-columns:1fr; } .results-heading { align-items:flex-start; flex-direction:column; gap:.35rem; } }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <span class="eyebrow">FESTIVAL SEARCH</span>
+      <h1>오늘 떠날 축제를<br>찾아보세요.</h1>
+      <p>지역과 기간, 키워드로 원하는 행사·축제 정보를 간편하게 찾아볼 수 있습니다.</p>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      <section class="search-panel" aria-labelledby="search-title">
+        <h2 id="search-title">검색 조건</h2>
+        <form id="search-form" novalidate>
+          <div class="field"><label for="region">지역</label><select id="region" name="region"><option value="">전체 지역</option><option value="11">서울특별시</option><option value="26">부산광역시</option><option value="41">경기도</option><option value="51">강원특별자치도</option></select></div>
+          <div class="field"><label for="start-date">시작일</label><input id="start-date" name="startDate" type="date" required></div>
+          <div class="field"><label for="end-date">종료일</label><input id="end-date" name="endDate" type="date" required></div>
+          <div class="field"><label for="keyword">키워드</label><input id="keyword" name="keyword" type="search" placeholder="축제명 또는 주소를 입력하세요"></div>
+          <div class="search-actions">
+            <button class="search-button sample-button" type="submit">샘플 검색</button>
+            <button id="live-search-button" class="search-button" type="button">실제 데이터 검색</button>
+          </div>
+        </form>
+        <p id="form-error" class="error" role="alert" aria-live="polite"></p>
+      </section>
+      <section class="results" aria-labelledby="results-title">
+        <div class="results-heading"><h2 id="results-title">검색 결과</h2><p id="count" class="count" aria-live="polite"></p></div>
+        <div id="result-content" class="status"><div><strong>지역과 날짜를 선택해 검색하세요.</strong><span>선택한 기간에 열리는 축제와 행사를 보여드릴게요.</span></div></div>
+      </section>
+    </div>
+  </main>
+  <script>
+    // mock_festivals.json과 동일한 샘플 데이터입니다. 로컬 파일 실행을 위해 내장합니다.
+    const festivals = [
+      {"lDongRegnCd":"11","title":"강남 미디어 윈터페스타","address":"서울특별시 강남구 영동대로 511 (삼성동)","startDate":"20251219","endDate":"20260103","image":"http://tong.visitkorea.or.kr/cms/resource/54/3579654_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"강서봄빛페스타","address":"서울특별시 강서구 금낭화로 178 (방화동)","startDate":"20260404","endDate":"20260404","image":"https://tong.visitkorea.or.kr/cms/resource/75/4055175_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"경복궁 생과방","address":"서울특별시 종로구 사직로 161 (세종로)","startDate":"20260408","endDate":"20260527","image":"https://tong.visitkorea.or.kr/cms/resource/63/4055163_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"강서어린이 동화축제","address":"서울특별시 강서구 금낭화로 178 (방화동)","startDate":"20260425","endDate":"20260425","image":"https://tong.visitkorea.or.kr/cms/resource/56/4059956_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"가족 예술축제 [톡톡]","address":"서울특별시 양천구 남부순환로64길 2 (신월동)","startDate":"20260502","endDate":"20260503","image":"https://tong.visitkorea.or.kr/cms/resource/96/4096496_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"강북구 어린이날 대축제","address":"서울특별시 강북구 월계로 173 (번동)","startDate":"20260502","endDate":"20260502","image":""},
+      {"lDongRegnCd":"11","title":"겸재문화예술제","address":"서울특별시 강서구 양천로47길 36 (마곡동)","startDate":"20260509","endDate":"20260509","image":"https://tong.visitkorea.or.kr/cms/resource/35/4061535_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"감탄로드 여행가챠 팝업스토어","address":"서울특별시 성동구 연무장5가길 22 (성수동2가)","startDate":"20260814","endDate":"20260816","image":"https://tong.visitkorea.or.kr/cms/resource/16/4097216_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"경복궁 별빛야행","address":"서울특별시 종로구 사직로 161 (세종로)","startDate":"20260902","endDate":"20261024","image":"https://tong.visitkorea.or.kr/cms/resource/35/4100435_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"강남페스티벌","address":"서울특별시 강남구 도산대로 320 (논현동)","startDate":"20261003","endDate":"20261005","image":"https://tong.visitkorea.or.kr/cms/resource/43/4101843_image2_1.jpg"},
+      {"lDongRegnCd":"11","title":"강동선사문화축제","address":"서울특별시 강동구 올림픽로 875 (암사동)","startDate":"20261016","endDate":"20261018","image":"https://tong.visitkorea.or.kr/cms/resource/77/3541977_image2_1.jpg"},
+      {"lDongRegnCd":"26","title":"강서 낙동강30리 벚꽃축제","address":"부산 강서구 대저1동 1-17","startDate":"20260403","endDate":"20260405","image":"https://tong.visitkorea.or.kr/cms/resource/77/4046477_image2_1.JPG"},
+      {"lDongRegnCd":"41","title":"경기도 문화사계 \"봄\" 경기 상상해 봄 페스타","address":"경기도 수원시 권선구 서둔로 166 (서둔동)","startDate":"20260328","endDate":"20260329","image":"https://tong.visitkorea.or.kr/cms/resource/69/4039669_image2_1.jpg"},
+      {"lDongRegnCd":"41","title":"경기미 김밥페스타","address":"경기도 수원시 영통구 광교중앙로 140 (하동)","startDate":"20260613","endDate":"20260614","image":"https://tong.visitkorea.or.kr/cms/resource/42/4058642_image2_1.jpg"},
+      {"lDongRegnCd":"41","title":"고양행주문화제","address":"경기도 고양시 덕양구 행주로15번길 89 (행주외동)","startDate":"20260613","endDate":"20260614","image":"https://tong.visitkorea.or.kr/cms/resource/34/4057034_image2_1.jpg"},
+      {"lDongRegnCd":"41","title":"고양 푸드앤비어페스티벌","address":"경기도 고양시 일산동구 중앙로 1305-56 (장항동)","startDate":"20260911","endDate":"20260913","image":"https://tong.visitkorea.or.kr/cms/resource/34/4104834_image2_1.jpg"},
+      {"lDongRegnCd":"41","title":"고양호수예술축제","address":"경기도 고양시 일산동구 호수로 595 (장항동)","startDate":"20260918","endDate":"20260920","image":"https://tong.visitkorea.or.kr/cms/resource/61/4081461_image2_1.jpg"},
+      {"lDongRegnCd":"41","title":"고양행주한우 숯불구이축제","address":"경기도 고양시 덕양구 원당로 16 (주교동)","startDate":"20261031","endDate":"20261101","image":"https://tong.visitkorea.or.kr/cms/resource/73/4066273_image2_1.jpg"},
+      {"lDongRegnCd":"41","title":"경기미 디저트 페스타","address":"경기도 수원시 권선구 세화로134번길 37 (서둔동)","startDate":"20261121","endDate":"20261122","image":"https://tong.visitkorea.or.kr/cms/resource/09/4106209_image2_1.jpg"},
+      {"lDongRegnCd":"51","title":"강릉 경포벚꽃축제","address":"강원특별자치도 강릉시 경포로 365","startDate":"20260404","endDate":"20260411","image":"https://tong.visitkorea.or.kr/cms/resource/23/4041323_image2_1.jpg"},
+      {"lDongRegnCd":"51","title":"강릉단오제","address":"강원특별자치도 강릉시 단오장길 1","startDate":"20260615","endDate":"20260622","image":"https://tong.visitkorea.or.kr/cms/resource/76/4057376_image2_1.JPG"},
+      {"lDongRegnCd":"51","title":"강원한우데이","address":"강원특별자치도 춘천시 시청길 11 (옥천동)","startDate":"20260619","endDate":"20260621","image":"https://tong.visitkorea.or.kr/cms/resource/78/4073378_image2_1.JPG"},
+      {"lDongRegnCd":"51","title":"강릉비치비어페스티벌","address":"강원특별자치도 강릉시 경포로 515 (안현동)","startDate":"20260703","endDate":"20260705","image":"https://tong.visitkorea.or.kr/cms/resource/30/4078330_image2_1.jpg"},
+      {"lDongRegnCd":"51","title":"경포 썸머 페스티벌","address":"강원특별자치도 강릉시 경포로 515 (안현동)","startDate":"20260730","endDate":"20260805","image":"https://tong.visitkorea.or.kr/cms/resource/15/4091115_image2_1.jpg"},
+      {"lDongRegnCd":"51","title":"강릉 국가유산야행","address":"강원특별자치도 강릉시 임영로131번길 6","startDate":"20260814","endDate":"20260816","image":"https://tong.visitkorea.or.kr/cms/resource/77/3317777_image2_1.jpg"},
+      {"lDongRegnCd":"51","title":"고성명태축제","address":"강원특별자치도 고성군 거진읍 해오름해변길 125","startDate":"20261002","endDate":"20261005","image":"https://tong.visitkorea.or.kr/cms/resource/00/4102200_image2_1.JPG"},
+      {"lDongRegnCd":"51","title":"강릉커피축제","address":"강원특별자치도 강릉시 창해로14번길 20-1 (견소동)","startDate":"20261021","endDate":"20261025","image":"https://tong.visitkorea.or.kr/cms/resource/24/3546224_image2_1.JPG"}
+    ];
+    const form = document.querySelector('#search-form');
+    const resultContent = document.querySelector('#result-content');
+    const count = document.querySelector('#count');
+    const formError = document.querySelector('#form-error');
+    const liveSearchButton = document.querySelector('#live-search-button');
+    const compactDate = (value) => value.replaceAll('-', '');
+    const displayDate = (value) => `${value.slice(0, 4)}.${value.slice(4, 6)}.${value.slice(6, 8)}`;
+    function addMeta(body, icon, text) { const row = document.createElement('div'); const symbol = document.createElement('span'); symbol.className = 'icon'; symbol.textContent = icon; const value = document.createElement('span'); value.textContent = text; row.append(symbol, value); body.append(row); }
+    function createCard(festival) { const card = document.createElement('article'); card.className = 'card'; const imageWrap = document.createElement('div'); imageWrap.className = 'image-wrap'; const fallback = document.createElement('div'); fallback.className = 'no-image'; fallback.textContent = '이미지 없음'; imageWrap.append(fallback); if (festival.image) { const image = new Image(); image.src = festival.image; image.alt = `${festival.title} 대표 이미지`; image.addEventListener('load', () => fallback.remove()); image.addEventListener('error', () => image.remove()); imageWrap.append(image); } const body = document.createElement('div'); body.className = 'card-body'; const title = document.createElement('h3'); title.textContent = festival.title; const meta = document.createElement('div'); meta.className = 'meta'; addMeta(meta, '⌖', festival.address || '주소 정보 없음'); addMeta(meta, '◷', `${displayDate(festival.startDate)} — ${displayDate(festival.endDate)}`); body.append(title, meta); card.append(imageWrap, body); return card; }
+    function showEmpty(message, detail) { resultContent.className = 'status'; resultContent.replaceChildren(); const container = document.createElement('div'); const strong = document.createElement('strong'); strong.textContent = message; const span = document.createElement('span'); span.textContent = detail; container.append(strong, span); resultContent.append(container); }
+    function getConditions() { const region = form.region.value; const start = compactDate(form.startDate.value); const end = compactDate(form.endDate.value); const keyword = form.keyword.value.trim(); formError.textContent = ''; count.textContent = ''; if (!start || !end) { formError.textContent = '시작일과 종료일을 모두 선택하세요.'; return null; } if (start > end) { formError.textContent = '종료일은 시작일보다 빠를 수 없습니다.'; return null; } return { region, start, end, keyword }; }
+    function renderResults(results, message) { if (!results.length) { showEmpty('입력한 조건에 맞는 조회 결과가 없습니다.', '지역, 기간 또는 키워드를 바꿔 다시 검색해 보세요.'); return; } resultContent.className = 'card-grid'; resultContent.replaceChildren(...results.map(createCard)); count.textContent = message || `${results.length}개의 행사·축제를 찾았습니다.`; }
+    form.addEventListener('submit', (event) => { event.preventDefault(); const conditions = getConditions(); if (!conditions) return; const keyword = conditions.keyword.toLocaleLowerCase('ko-KR'); const results = festivals.filter((festival) => (!conditions.region || festival.lDongRegnCd === conditions.region) && festival.endDate >= conditions.start && festival.startDate <= conditions.end && (!keyword || `${festival.title} ${festival.address}`.toLocaleLowerCase('ko-KR').includes(keyword))); renderResults(results, `${results.length}개의 샘플 행사·축제를 찾았습니다.`); });
+    liveSearchButton.addEventListener('click', async () => { const conditions = getConditions(); if (!conditions) return; liveSearchButton.disabled = true; liveSearchButton.textContent = '불러오는 중…'; showEmpty('행사 정보를 불러오는 중입니다.', '공공데이터포털에서 행사 정보를 확인하고 있어요.'); try { const query = new URLSearchParams({ region: conditions.region, startDate: conditions.start, endDate: conditions.end, keyword: conditions.keyword }); const apiResponse = await fetch(`/api/festivals?${query.toString()}`); const data = await apiResponse.json(); if (!apiResponse.ok) throw new Error(data.error || '요청을 처리하지 못했습니다.'); renderResults(data.festivals || [], `${(data.festivals || []).length}개의 실제 행사·축제를 찾았습니다.${data.partial ? ' 일부 결과만 확인했습니다.' : ''}`); } catch (error) { showEmpty('행사 정보를 불러오지 못했습니다.', error.message || '잠시 후 다시 시도하세요.'); } finally { liveSearchButton.disabled = false; liveSearchButton.textContent = '실제 데이터 검색'; } });
+  </script>
+</body>
+</html>
